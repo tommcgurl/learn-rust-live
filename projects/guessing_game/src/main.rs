@@ -1,6 +1,5 @@
-use std::io;
+use std::{cmp::Ordering, io};
 use rand::Rng;
-use std::cmp::Ordering;
 
 fn main() {
     println!("Guess the number!");
@@ -21,9 +20,10 @@ fn main() {
         let guess: u32 = match guess.trim().parse() {
             Ok(num) => num,
             Err(_) => {
-                println!("Please input a number.");
-                continue;
+              println!("Please enter a valid number.");
+              continue;
             }
+
         };
 
         println!("You guessed: {}", guess);
