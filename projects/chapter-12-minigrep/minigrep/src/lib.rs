@@ -1,9 +1,10 @@
-use std::fs;
+use std::{fs, env};
 use std::error::Error;
 
 pub struct Config {
     pub query: String,
     pub filename: String,
+    pub case_sensitive: bool,
 }
 
 impl Config {
@@ -11,17 +12,27 @@ impl Config {
         if args.len() < 3 {
             return Err("Not enough arguments.");
         }
+        let mut case_sensitive = env::var("CASE_INSENSITIVE").is_err();
+        if args.len() == 4 {
+           case_sensitive = parse_case_sensitivity_arg(args[3].clone());
+        }
         let query = args[1].clone();
         let filename = args[2].clone();
 
-        Ok(Config { query, filename })
+        Ok(Config { query, filename, case_sensitive })
     }
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.filename)?;
+
+    let results = if config.case_sensitive {
+        search(&config.query, &contents)
+    } else {
+        search_case_insensitive(&config.query, &contents)
+    };
     
-    for line in search(&config.query, &contents) {
+    for line in results {
         println!("{}", line);
     }
 
@@ -53,6 +64,15 @@ pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a st
     results
 }
 
+pub fn parse_case_sensitivity_arg(arg: String) -> bool {
+    let normalized_arg = arg.to_lowercase();
+    if normalized_arg == "insensitive" {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -81,4 +101,22 @@ Trust me.";
         assert_eq!(vec!["Rust:", "Trust me."], search_case_insensitive(query, contents))
     }
 }
+
+    #[test]
+    fn case_sensitivity_arg_sensitive() {
+        let case_sensitivity_arg = String::from("sensitive");
+        assert_eq!(true, parse_case_sensitivity_arg(case_sensitivity_arg));
+    }
+
+    #[test]
+    fn case_sensitivity_arg_insensitive() {
+        let case_sensitivity_arg = String::from("insensitive");
+        assert_eq!(false, parse_case_sensitivity_arg(case_sensitivity_arg));
+    }
+
+    #[test]
+    fn case_sensitivity_arg_invalid() {
+        let case_sensitivity_arg = String::from("invalid_arg");
+        assert_eq!(true, parse_case_sensitivity_arg(case_sensitivity_arg));
+    }
 
