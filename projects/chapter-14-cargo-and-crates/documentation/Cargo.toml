@@ -1,8 +1,6 @@
 [package]
-name = "minigrep"
+name = "documentation"
 version = "0.1.0"
-license = "MIT"
-description = "A mini clone of the grep utility."
 authors = ["Tom McGurl <tom.mcgurl@gmail.com>"]
 edition = "2018"
 
