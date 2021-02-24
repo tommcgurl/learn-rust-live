@@ -4,12 +4,13 @@ fn main() {
     let mut post = Post::new();
 
     post.add_text("What up Twitch an Youtube!");
-    assert_eq!("", post.content());
 
+    let post = post.request_review();
 
-    post.request_review();
-    assert_eq!("", post.content());
+    // First approval
+    let post = post.approve();
+    let post = post.approve();
 
-    post.approve();
+    // Secon approval
     assert_eq!("What up Twitch an Youtube!", post.content());
 }
